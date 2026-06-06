@@ -373,11 +373,11 @@
                 {#each filteredItemStart as item}
                     <div
                         role="button"
-                        tabindex="0"
+                        
                         class="dropdown-item"
                         onclick={() => {
                             startValue = item;
-                            clickedpoint = startValue;
+                            
                             filteredItemStart = [];
                             routePlanning("start", startValue, start);
 
@@ -405,7 +405,7 @@
                     {#each filteredItemFinish as item}
                         <div
                             role="button"
-                            tabindex="0"
+                            
                             class="dropdown-item"
                             onclick={() => {
                                 endValue = item;
