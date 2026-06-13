@@ -133,7 +133,9 @@
                 left: 50,
                 right: 50,
                 bottom: 50,
-            } },
+            },
+            bearing: map.getBearing()
+        },
         );
         var bufferedmask = turf.buffer(pathLineString, 1000, { units: "meters" });
         var buffered = turf.buffer(pathLineString, 2, { units: "meters" });
