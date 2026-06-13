@@ -4,6 +4,8 @@
     import paths from "../data/PATH-paths.geo.json";
     import buildings from "../data/PATH-buildings.geo.json";
     import * as turf from "@turf/turf"; // this is for fitting the map boundary to GTA municipalities
+    import { difference } from "@turf/difference";
+    import { polygon } from "@turf/helpers";
     import positron from "../data/positron.json";
     import { onMount } from "svelte";
     import "maplibre-gl/dist/maplibre-gl.css";
@@ -22,29 +24,29 @@
     let startValue = $state("");
     let endValue = $state("");
     let colouring =  
-                    [
-                        "match",
-                        ["get", "Level"],
-                        "Level P3",                         "#9b2226",
-                        "Level P2",                         "#219ebc",
-                        "Level P1",                         "#ca6702",
-                        "Level P0.5",                       "#a68a64",
-                        "Level 1",                          "#94d2bd",
-                        "Level 1.5",                        "#0a9396",
-                        "Level 2",                          "#005f73",
-                        "Level 3",                          "#001219",
-                        "Level 4",                          "#001219",                        
-                        "Level 5",                          "#333d29",
-                        "Stairs",                           "#588157",
-                        "Escalators",                       "#fb8500",
-                        "Slope",                            "#C3B1E1",
-                        "Elevator",                         "#B4C424",
-                        "Sky Bridge",                       "#7393B3",
-                        "",                                 "red",
-                        "Level 1 (Outside)",                "#6699CD",
-                        "#a9d6e5",
-                    ]
-    let routeids = []
+        [
+            "match",
+            ["get", "Level"],
+            "Level P3",                         "#9b2226",
+            "Level P2",                         "#219ebc",
+            "Level P1",                         "#0077b6",
+            "Level P0.5",                       "#a68a64",
+            "Level 1",                          "#94d2bd",
+            "Level 1.5",                        "#0a9396",
+            "Level 2",                          "#005f73",
+            "Level 3",                          "#e09f3e",
+            "Level 4",                          "#b08968",
+            "Level 5",                          "#333d29",
+            "Stairs",                           "#588157",
+            "Escalators",                       "#fb8500",
+            "Slope",                            "#C3B1E1",
+            "Elevator",                         "#B4C424",
+            "Sky Bridge",                       "#7393B3",
+            "",                                 "red",
+            "Level 1 (Outside)",                "#6699CD",
+            "#a9d6e5",
+        ]
+
     function createEmptyPoint() {
         return {
             type: "Feature",
@@ -67,6 +69,14 @@
 
             map.removeSource("routing-source");
 
+            map.removeLayer("routing-mask-layer");
+
+            map.removeSource("routing-mask-source");
+
+            map.removeLayer("routing-line-layer");
+
+            map.removeSource("routing-line-source");
+
             // if we want to remove the source of routing-source, only use when we try to find new paths.
         }
         pathLineString = undefined;
@@ -74,11 +84,11 @@
 
     function findpath(start, finish) {
         //remove source and layer if it already exists
-        routeids = [];
+
         removePathString();
         //pathfinder function
         const pathFinder = new PathFinder(paths, {
-            precision: 0.00005,
+            precision: 0.0000005,
             weight: function (a, b, props) {
                 // Use the custom weight if it exists in your GeoJSON properties
                 if (props && props.Cost) {
@@ -90,9 +100,6 @@
                         const dy = a[1] - b[1]
                         return Math.sqrt(dx * dx + dy * dy)*props.Cost;
                     }
-                    
-                    
-                    
                 }
             },
         });
@@ -109,10 +116,55 @@
         // 3. Safe to parse now that we know it exists
         pathLineString = pathToGeoJSON(calculatedPath);
 
+        let coordinates = pathLineString.geometry.coordinates
+        // Pass the first coordinates in the LineString to `lngLatBounds` &
+        // wrap each coordinate pair in `extend` to include them in the bounds
+        // result. A variation of this technique could be applied to zooming
+        // to the bounds of multiple Points or Polygon geometries - it just
+        // requires wrapping all the coordinates with the extend method.
+        const bounds = coordinates.reduce((bounds, coord) => {
+            return bounds.extend(coord);
+        }, new maplibregl.LngLatBounds(coordinates[0], coordinates[0]));
+
+        map.fitBounds(
+            bounds,
+            { padding: {
+                top: 200,
+                left: 50,
+                right: 50,
+                bottom: 50,
+            } },
+        );
+        var bufferedmask = turf.buffer(pathLineString, 1000, { units: "meters" });
+        var buffered = turf.buffer(pathLineString, 2, { units: "meters" });
+        
+        //cutout the mask
+        const erasedResult = difference({
+            type: 'FeatureCollection',
+            features: [bufferedmask, buffered]
+            });
+
+
+        //visualizing the information
+        map.addSource("routing-mask-source", {
+            type: "geojson",
+            data: erasedResult,
+        });
+
+        map.addLayer({
+            id: "routing-mask-layer",
+            type: "fill",
+            source: "routing-mask-source",
+            paint: {
+                "fill-opacity": 0.2,
+                "fill-color": "black"
+            },
+        });
+
         //visualizing the information
         map.addSource("routing-source", {
             type: "geojson",
-            data: pathLineString,
+            data: buffered,
         });
 
         map.addLayer({
@@ -121,9 +173,54 @@
             source: "routing-source",
             paint: {
                 "line-color": "yellow",
-                "line-width": 1.7,
+                "line-width": {
+                        "stops": [
+                        [
+                            15,
+                            1
+                        ],
+                        [
+                            18,
+                            5
+                        ]
+                    
+                    ]
+                },
             },
         });
+
+        //visualizing the information
+        map.addSource("routing-line-source", {
+            type: "geojson",
+            data: pathLineString,
+        });
+
+        map.addLayer({
+            id: "routing-line-layer",
+            type: "line",
+            source: "routing-line-source",
+            paint: {
+                "line-color": "yellow",
+                "line-width": {
+                        "stops": [
+                        [
+                            15,
+                            1
+                        ],
+                        [
+                            18,
+                            1.5
+                        ]
+                    
+                    ]
+                }
+            },
+        });
+        map.moveLayer('poi-paths-building-labels')
+        map.moveLayer('paths-building-layer')
+        map.moveLayer('paths-building-end')
+        map.moveLayer('paths-building-start')
+        
     }
 
     const menuItems = [];
@@ -228,7 +325,19 @@
                     ],
                 paint: {
                     "line-color": colouring,
-                    "line-width": 4,
+                    "line-width": {
+                        "stops": [
+                        [
+                            16,
+                            3
+                        ],
+                        [
+                            18,
+                            10
+                        ]
+                    
+                    ]
+                }
                 },
             });
             
@@ -245,7 +354,19 @@
                     ],
                 paint: {
                     "line-color": colouring,
-                    "line-width": 4,
+                    "line-width": {
+                        "stops": [
+                        [
+                            15,
+                            3
+                        ],
+                        [
+                            18,
+                            6
+                        ]
+                    
+                    ]
+                },
                     'line-dasharray': [1, 0.75],
                 },
             });
@@ -257,16 +378,16 @@
                 
                 layout: {
                     'text-field': ['get', 'Level'],
-                    'text-font': ['Verdana Bold'],
-                    
+                    'text-font': ['Helvetica'],
+                    "text-offset": [0, 1],
                     "text-rotation-alignment": "map",
-                    'text-radial-offset': 5,
+                    
                     'text-justify': 'auto',
                     "symbol-placement": "line",
                     "symbol-spacing": 200,
                     "text-size": 12
                 }, 
-                minZoom: 20,
+                minzoom: 15,
                 paint: {
                     "text-halo-color": "white",
                     "text-halo-width": 2,
@@ -292,8 +413,10 @@
                 source: "paths-building-source",
                 filter: ["==", ["get", "BldgName"], ""],
                 paint: {
-                    "circle-radius": 8,
-                    "circle-color": "#ee9b00",
+                    "circle-radius": 5,
+                    "circle-color": "#ff9f1c",
+                    "circle-stroke-width": 2,
+                    "circle-stroke-color": "#000000"
                 },
             });
 
@@ -303,9 +426,36 @@
                 source: "paths-building-source",
                 filter: ["==", ["get", "BldgName"], ""],
                 paint: {
-                    "circle-radius": 8,
+                    "circle-radius": 5,
                     "circle-color": "#AA4A44",
+                    "circle-stroke-width": 2,
+                    "circle-stroke-color": "#000000"
                 },
+            });
+
+            map.addLayer({
+                id: 'poi-paths-building-labels',
+                type: 'symbol',
+                source: 'paths-building-source',
+                minzoom: 16,
+                layout: {
+                    'text-field': ['get', 'BldgName'],
+                    'text-font': ['Helvetica Bold'],
+                    "text-anchor": "top",
+                    "text-rotation-alignment": "viewport",
+                    /*'text-radial-offset': 0.5,*/
+                    "text-offset": [0, 0.5],
+                    'text-justify': 'center',
+                    "text-max-width": 8,
+                    "text-size": 12
+                }, 
+                minZoom: 20,
+                paint: {
+                    "text-halo-color": "white",
+                    "text-halo-width": 2,
+                    "text-color": "#484848",
+                    
+                }
             });
         });
 
@@ -420,6 +570,7 @@
                         onclick={() => {
                             startValue = item;
                             filteredItemStart = [];
+                            console.log("clicked on the start box")
                             routePlanning("start", startValue, start);
 
                             if (finish.geometry.coordinates.length != 0) {
@@ -542,7 +693,6 @@
         height: 28px;
         border-radius: 20px;
         color: black;
-
         border-width: 0px;
         position: relative;
         font-weight: bold;
