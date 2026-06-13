@@ -19,9 +19,12 @@
         border: none;
         border-bottom: 1px solid #ddd;
         width: 100%;
+        border-radius: 5px;
+        
     }
     
     .search-input:focus {
-        outline: 3px solid #ddd;
+        outline: 3px solid #f6bd60;
+
     }
 </style>

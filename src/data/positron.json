@@ -18,7 +18,7 @@
           "visibility": "visible"
         },
         "paint": {
-          "background-color": "#fafaf8",
+          "background-color": "#edede9",
           "background-opacity": 1
         }
       },
@@ -50,27 +50,16 @@
             "stops": [
               [
                 8,
-                "rgba(234, 241, 233, 0.5)"
+                "#606c38"
               ],
-              [
-                9,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                11,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                13,
-                "rgba(234, 241, 233, 0.5)"
-              ],
+
               [
                 15,
-                "rgba(234, 241, 233, 0.5)"
+                "#606c38"
               ]
             ]
           },
-          "fill-opacity": 1
+          "fill-opacity": 0.2
         }
       },
       {
@@ -141,23 +130,11 @@
             "stops": [
               [
                 8,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                9,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                11,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                13,
-                "rgba(234, 241, 233, 0.5)"
+                "#606c38"
               ],
               [
                 15,
-                "rgba(234, 241, 233, 0.5)"
+                "#606c38"
               ]
             ]
           },
@@ -191,50 +168,8 @@
           ]
         ],
         "paint": {
-          "fill-color": {
-            "stops": [
-              [
-                5,
-                "rgba(237, 237, 237, 0.5)"
-              ],
-              [
-                8,
-                "rgba(237, 237, 237, 0.45)"
-              ],
-              [
-                9,
-                "rgba(237, 237, 237, 0.4)"
-              ],
-              [
-                11,
-                "rgba(237, 237, 237, 0.35)"
-              ],
-              [
-                13,
-                "rgba(237, 237, 237, 0.3)"
-              ],
-              [
-                15,
-                "rgba(237, 237, 237, 0.25)"
-              ],
-              [
-                16,
-                "rgba(237, 237, 237, 0.25)"
-              ]
-            ]
-          },
-          "fill-opacity": {
-            "stops": [
-              [
-                6,
-                0.6
-              ],
-              [
-                9,
-                1
-              ]
-            ]
-          }
+          "fill-color": "#e56b6f",
+          "fill-opacity": 0
         }
       },
       {
@@ -256,30 +191,8 @@
           ]
         ],
         "paint": {
-          "fill-color": {
-            "stops": [
-              [
-                8,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                9,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                11,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                13,
-                "rgba(234, 241, 233, 0.5)"
-              ],
-              [
-                15,
-                "rgba(234, 241, 233, 0.5)"
-              ]
-            ]
-          }
+          "fill-color": "#bb9457",
+          "fill-opacity":0
         }
       },
       {
@@ -473,68 +386,13 @@
           "visibility": "visible"
         },
         "paint": {
-          "fill-color": "grey",
+          "fill-color": "#778da9",
           "fill-antialias": true,
           "fill-translate-anchor": "map",
           "fill-opacity": 1
         }
       },
-      {
-        "id": "water_shadow",
-        "type": "fill",
-        "source": "carto",
-        "source-layer": "water",
-        "minzoom": 0,
-        "filter": [
-          "all",
-          [
-            "==",
-            "$type",
-            "Polygon"
-          ]
-        ],
-        "layout": {
-          "visibility": "visible"
-        },
-        "paint": {
-          "fill-color": "transparent",
-          "fill-antialias": true,
-          "fill-translate-anchor": "map",
-          "fill-opacity": 1,
-          "fill-translate": {
-            "stops": [
-              [
-                0,
-                [
-                  0,
-                  2
-                ]
-              ],
-              [
-                6,
-                [
-                  0,
-                  1
-                ]
-              ],
-              [
-                14,
-                [
-                  0,
-                  1
-                ]
-              ],
-              [
-                17,
-                [
-                  0,
-                  2
-                ]
-              ]
-            ]
-          }
-        }
-      },
+      
       {
         "id": "aeroway-runway",
         "type": "line",
@@ -638,11 +496,7 @@
         "layout": {
           "text-field": "{name_en}",
           "text-font": [
-            "Montserrat Regular Italic",
-            "Open Sans Italic",
-            "Noto Sans Regular",
-            "HanWangHeiLight Regular",
-            "NanumBarunGothic Regular"
+            "Montserrat Regular Italic"
           ],
           "symbol-placement": "line",
           "symbol-spacing": 300,
@@ -655,45 +509,21 @@
               ],
               [
                 10,
-                9
+                20
               ]
             ]
           },
           "text-padding": 2,
           "text-pitch-alignment": "auto",
           "text-rotation-alignment": "auto",
-          "text-offset": {
-            "stops": [
-              [
-                6,
-                [
-                  0,
-                  -0.2
-                ]
-              ],
-              [
-                11,
-                [
-                  0,
-                  -0.4
-                ]
-              ],
-              [
-                12,
-                [
-                  0,
-                  -0.6
-                ]
-              ]
-            ]
-          },
+          "text-offset":[0, 0] ,
           "text-letter-spacing": 0,
           "text-keep-upright": true
         },
         "paint": {
-          "text-color": "#7a96a0",
-          "text-halo-color": "#f5f5f3",
-          "text-halo-width": 1
+          "text-color": "#e0e1dd",
+          "text-halo-color": "#e0e1dd",
+          "text-halo-width": 0
         }
       },
       {
@@ -1153,11 +983,7 @@
         "maxzoom": 24,
         "filter": [
           "all",
-          [
-            "==",
-            "class",
-            "path"
-          ],
+          
           [
             "==",
             "brunnel",
@@ -1173,15 +999,15 @@
             "stops": [
               [
                 15,
-                0.5
+                0
               ],
               [
                 16,
-                1
+                0
               ],
               [
                 18,
-                3
+                0
               ]
             ]
           },
@@ -2395,6 +2221,8 @@
           }
         }
       },
+      
+      
       {
         "id": "road_path",
         "type": "line",
@@ -2407,7 +2235,6 @@
           [
             "in",
             "class",
-            "path",
             "track"
           ],
           [
@@ -2453,6 +2280,59 @@
                   3,
                   3
                 ]
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": "building",
+        "type": "fill",
+        "source": "carto",
+        "source-layer": "building",
+        "layout": {
+          "visibility": "visible"
+        },
+        "paint": {
+          "fill-color": {
+            "base": 1,
+            "stops": [
+              [
+                10,
+                "#FFBE98"
+              ],
+              [
+                16,
+                "#FFBE98"
+              ]
+            ]
+          },
+          "fill-antialias": true,
+          "fill-opacity": 0
+        }
+      },
+      {
+        "id": "building-top",
+        "type": "fill",
+        "source": "carto",
+        "source-layer": "building",
+        "layout": {
+          "visibility": "visible"
+        },
+        "paint": {
+          
+          "fill-outline-color": "#8e9aaf",
+          "fill-color": "#8e9aaf",
+          "fill-opacity": {
+            "base": 1,
+            "stops": [
+              [
+                5,
+                0.12
+              ],
+              [
+                16,
+                0.12
               ]
             ]
           }
@@ -3620,11 +3500,7 @@
         "maxzoom": 24,
         "filter": [
           "all",
-          [
-            "==",
-            "class",
-            "path"
-          ],
+          
           [
             "==",
             "brunnel",
@@ -4037,76 +3913,7 @@
           "line-color": "#fff"
         }
       },
-      {
-        "id": "building",
-        "type": "fill",
-        "source": "carto",
-        "source-layer": "building",
-        "layout": {
-          "visibility": "visible"
-        },
-        "paint": {
-          "fill-color": {
-            "base": 1,
-            "stops": [
-              [
-                15.5,
-                "#dfdfdf"
-              ],
-              [
-                16,
-                "#dfdfdf"
-              ]
-            ]
-          },
-          "fill-antialias": true
-        }
-      },
-      {
-        "id": "building-top",
-        "type": "fill",
-        "source": "carto",
-        "source-layer": "building",
-        "layout": {
-          "visibility": "visible"
-        },
-        "paint": {
-          "fill-translate": {
-            "base": 1,
-            "stops": [
-              [
-                14,
-                [
-                  0,
-                  0
-                ]
-              ],
-              [
-                16,
-                [
-                  -2,
-                  -2
-                ]
-              ]
-            ]
-          },
-          "fill-outline-color": "#dfdfdf",
-          "fill-color": "#ededed",
-          "fill-opacity": {
-            "base": 1,
-            "stops": [
-              [
-                13,
-                0
-              ],
-              [
-                16,
-                1
-              ]
-            ]
-          }
-        }
-      },
+      
       {
         "id": "boundary_country_outline",
         "type": "line",

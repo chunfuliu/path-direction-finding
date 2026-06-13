@@ -8,7 +8,7 @@
     import { onMount } from "svelte";
     import "maplibre-gl/dist/maplibre-gl.css";
 
-    import Link from "./Link.svelte";
+
     import Input from "./Input.svelte";
 
     let menuOpen = $state(false);
@@ -21,7 +21,30 @@
     let pathLocation = $state("Find a Path");
     let startValue = $state("");
     let endValue = $state("");
-
+    let colouring =  
+                    [
+                        "match",
+                        ["get", "Level"],
+                        "Level P3",                         "#9b2226",
+                        "Level P2",                         "#219ebc",
+                        "Level P1",                         "#ca6702",
+                        "Level P0.5",                       "#a68a64",
+                        "Level 1",                          "#94d2bd",
+                        "Level 1.5",                        "#0a9396",
+                        "Level 2",                          "#005f73",
+                        "Level 3",                          "#001219",
+                        "Level 4",                          "#001219",                        
+                        "Level 5",                          "#333d29",
+                        "Stairs",                           "#588157",
+                        "Escalators",                       "#fb8500",
+                        "Slope",                            "#C3B1E1",
+                        "Elevator",                         "#B4C424",
+                        "Sky Bridge",                       "#7393B3",
+                        "",                                 "red",
+                        "Level 1 (Outside)",                "#6699CD",
+                        "#a9d6e5",
+                    ]
+    let routeids = []
     function createEmptyPoint() {
         return {
             type: "Feature",
@@ -38,37 +61,42 @@
     }
     function removePathString() {
         if (pathLineString != undefined) {
-            console.log(
-                "removepathstring triggered, pathlinestring is not undefined",
-            );
+
             pathLineString = undefined;
             map.removeLayer("routing-layer");
-            console.log("removepathstring triggered, remove filter on start");
 
             map.removeSource("routing-source");
 
             // if we want to remove the source of routing-source, only use when we try to find new paths.
         }
-
         pathLineString = undefined;
     }
 
     function findpath(start, finish) {
         //remove source and layer if it already exists
-        console.log(pathLineString);
+        routeids = [];
         removePathString();
-
         //pathfinder function
         const pathFinder = new PathFinder(paths, {
-            precision: 0.0005,
+            precision: 0.00005,
             weight: function (a, b, props) {
-                // 1. Use the custom weight if it exists in your GeoJSON properties
+                // Use the custom weight if it exists in your GeoJSON properties
                 if (props && props.Cost) {
-                    return props.Cost;
+                    if (props.Level == "Elevator" || props.Level == "Escalator"){
+                        return props.Cost
+                    }
+                    else {
+                        const dx = a[0] - b[0]
+                        const dy = a[1] - b[1]
+                        return Math.sqrt(dx * dx + dy * dy)*props.Cost;
+                    }
+                    
+                    
+                    
                 }
             },
         });
-
+        
         // 1. Calculate the raw path
         const calculatedPath = pathFinder.findPath(start, finish);
 
@@ -92,8 +120,8 @@
             type: "line",
             source: "routing-source",
             paint: {
-                "line-color": "#FF0000",
-                "line-width": 2,
+                "line-color": "yellow",
+                "line-width": 1.7,
             },
         });
     }
@@ -127,7 +155,6 @@
     );
 
     function routePlanning(status, value, updatePoint) {
-        console.log(`routePlanning triggered from ${status}`);
         map.setFilter(`paths-building-${status}`, [
             "==",
             ["get", "BldgName"],
@@ -150,8 +177,8 @@
             style: positron, //'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
             center: [-79.383, 43.648], // starting position
             minZoom: 12.5,
-            zoom: 13.5,
-            maxZoom: 19,
+            zoom: 14.5,
+            maxZoom: 22,
             projection: "globe",
             scrollZoom: true,
             attributionControl: false,
@@ -184,55 +211,69 @@
                 type: "geojson",
                 data: buildings,
             });
-            /*
+            
             map.addLayer({
                 id: "paths-layer",
                 type: "line",
                 source: "paths-source",
-                paint: {
-                    "line-color": "#b6ad90",
-                    "line-width": 6,
-                },
-            });
-            */
-            map.addLayer({
-                id: "paths-layer",
-                type: "line",
-                source: "paths-source",
-                paint: {
-                    "line-color": [
-                        "match",
-                        ["get", "Level"],
-                        "Level P3",
-                        "#582f0e",
-                        "Level P2",
-                        "#7f4f24",
-                        "Level P1",
-                        "#936639",
-                        "Level P0.5",
-                        "#a68a64",
-                        "Level 1",
-                        "#b6ad90",
-                        "Level 1.5",
-                        "#c2c5aa",
-                        "Level 2",
-                        "#a4ac86",
-                        "Level 3",
-                        "#656d4a",
-                        "Level 4",
-                        "#414833",
-                        "Level 5",
-                        "#333d29",
-                        "Stairs",
-                        "#000000",
-                        "Escalators",
-                        "#4F7942",
-                        "#a9d6e5",
+                filter: ["match", ["get", "Level"], 
+                        ["Level P3",        "Level P2",             
+                        "Level P1",         "Level P0.5",        
+                        "Level 1",          "Level 1.5",          
+                        "Level 2",          "Level 3",         
+                        "Level 4",          "Level 5", 
+                        "Sky Bridge",       "Elevator", "" ],
+                        true,  // Return true if matched (keep the feature)
+                        false
                     ],
-                    "line-width": 6,
+                paint: {
+                    "line-color": colouring,
+                    "line-width": 4,
                 },
             });
             
+            map.addLayer({
+                id: "paths-dashed-layer",
+                type: "line",
+                source: "paths-source",
+                filter: ["match", ["get", "Level"], 
+                        ["Stairs",      "Escalators",   
+                        "Level 1 (Outside)",          
+                         "Slope"      ],
+                        true,  // Return true if matched (keep the feature)
+                        false
+                    ],
+                paint: {
+                    "line-color": colouring,
+                    "line-width": 4,
+                    'line-dasharray': [1, 0.75],
+                },
+            });
+
+            map.addLayer({
+                id: 'poi-labels',
+                type: 'symbol',
+                source: 'paths-source',
+                
+                layout: {
+                    'text-field': ['get', 'Level'],
+                    'text-font': ['Verdana Bold'],
+                    
+                    "text-rotation-alignment": "map",
+                    'text-radial-offset': 5,
+                    'text-justify': 'auto',
+                    "symbol-placement": "line",
+                    "symbol-spacing": 200,
+                    "text-size": 12
+                }, 
+                minZoom: 20,
+                paint: {
+                    "text-halo-color": "white",
+                    "text-halo-width": 2,
+                    "text-color": "#484848",
+                    
+                }
+            });
             map.addLayer({
                 id: "paths-building-layer",
                 type: "circle",
@@ -290,6 +331,7 @@
                     ["get", "BldgName"],
                     bldgName,
                 ]);
+                
                 // 3. 💡 Use the bulletproof, unsimplified coordinates
                 finish.geometry.coordinates =
                     originalBuilding.geometry.coordinates;
@@ -359,8 +401,8 @@
                 pathLocation = "Find a Path"
             }
         }}
-        style="background-color: {menuOpen ? '#a9d6e5' : ''}; color: {menuOpen
-            ? 'black'
+        style="background-color: {menuOpen ? '#283618' : '#ee9b00'}; color: {menuOpen
+            ? 'white'
             : 'black'}"
         >{pathLocation}
     </button>
@@ -377,12 +419,10 @@
                         class="dropdown-item"
                         onclick={() => {
                             startValue = item;
-                            
                             filteredItemStart = [];
                             routePlanning("start", startValue, start);
 
                             if (finish.geometry.coordinates.length != 0) {
-                                console.log("start triggers findpath");
                                 findpath(start, finish);
                             }
                         }}
@@ -415,8 +455,6 @@
                                 // if it is in seaching path mode, run the find path and route planning functions, otherwise no need to run it.
                                 routePlanning("end", endValue, finish);
                                 if (menuOpen) {
-                                    console.log("search path mode");
-
                                     findpath(start, finish);
                                 }
                             }}
@@ -450,12 +488,15 @@
         width: auto;
         top: 2vw;
         left: 2vw;
+        background-color: #588157;
+        padding: 10px;
         z-index: 1; /* Ensures it sits above the map */
         /*width: auto;  Adjust as needed */
         min-width: 250px;
         display: flex;
         flex-direction: column;
         gap: 10px; /* Space between the two search bars */
+        border-radius: 10px;
     }
 
     h1 {
@@ -465,6 +506,7 @@
     .dropdown {
         position: relative;
         display: inline-block;
+        border-radius: 5px;
     }
 
     .dropdown-content {
@@ -474,8 +516,10 @@
         max-height: 200px;
         border: 1px solid #f6f6f6;
         z-index: 1;
-        font-family: Arial;
+        font-family: Verdana;
         overflow-y: auto;
+        border-radius: 5px;
+        outline: 3px solid #f6bd60;
     }
     .dropdown-item {
         cursor: pointer;
@@ -483,6 +527,8 @@
         box-sizing: border-box;
         padding-left: 15px;
         padding-right: 15px;
+        border-radius: 20px;
+        
     }
 
     /* Optional: Add a hover effect so users know it's clickable */
@@ -494,10 +540,9 @@
         font-size: 12px;
         width: auto;
         height: 28px;
-
+        border-radius: 20px;
         color: black;
-        margin-right: 5px;
-        margin-bottom: 5px;
+
         border-width: 0px;
         position: relative;
         font-weight: bold;
