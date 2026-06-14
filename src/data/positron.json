@@ -18,7 +18,7 @@
           "visibility": "visible"
         },
         "paint": {
-          "background-color": "#edede9",
+          "background-color": "#EEF1F0",
           "background-opacity": 1
         }
       },
@@ -2299,11 +2299,11 @@
             "stops": [
               [
                 10,
-                "#FFBE98"
+                "#DEE4E1"
               ],
               [
                 16,
-                "#FFBE98"
+                "#DEE4E1"
               ]
             ]
           },
@@ -2321,18 +2321,18 @@
         },
         "paint": {
           
-          "fill-outline-color": "#8e9aaf",
-          "fill-color": "#8e9aaf",
+          "fill-outline-color": "#DEE4E1",
+          "fill-color": "#DEE4E1",
           "fill-opacity": {
             "base": 1,
             "stops": [
               [
                 5,
-                0.12
+                1
               ],
               [
                 16,
-                0.12
+                1
               ]
             ]
           }

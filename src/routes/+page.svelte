@@ -16,11 +16,11 @@
     let menuOpen = $state(false);
     let map;
     let startend = $state("start");
-    let placeholder = $state("Find a place in PATH");
+    let placeholder = $state("Type here or click on map to find a place in PATH");
     let pathLineString;
     let start = createEmptyPoint();
     let finish = createEmptyPoint();
-    let pathLocation = $state("Find a Path");
+    let pathLocation = $state("Click to Find a Path");
     let startValue = $state("");
     let endValue = $state("");
     let colouring =  
@@ -28,17 +28,17 @@
             "match",
             ["get", "Level"],
             "Level P3",                         "#9b2226",
-            "Level P2",                         "#219ebc",
-            "Level P1",                         "#0077b6",
-            "Level P0.5",                       "#a68a64",
-            "Level 1",                          "#94d2bd",
+            "Level P2",                         "#2596be",
+            "Level P1",                         "#72C3B8",
+            "Level P0.5",                       "#6C7678",
+            "Level 1",                          "#00B6E6",
             "Level 1.5",                        "#0a9396",
             "Level 2",                          "#005f73",
             "Level 3",                          "#e09f3e",
             "Level 4",                          "#b08968",
             "Level 5",                          "#333d29",
             "Stairs",                           "#588157",
-            "Escalators",                       "#fb8500",
+            "Escalators",                       "#F49200",
             "Slope",                            "#C3B1E1",
             "Elevator",                         "#B4C424",
             "Sky Bridge",                       "#7393B3",
@@ -53,7 +53,7 @@
             properties: {
                 Id: 0,
                 BldgName: "",
-                Address: null,
+                Address: "",
             },
             geometry: {
                 type: "Point",
@@ -283,22 +283,35 @@
             attributionControl: false,
             bearing: -15.8,
         });
-        // Instantiate and add Geolocate control
+
         const geolocateControl = new maplibregl.GeolocateControl({
             positionOptions: {
                 enableHighAccuracy: true,
             },
             trackUserLocation: true,
         });
-        // Add geolocate control to the map.
-        map.addControl(
-            new maplibregl.GeolocateControl({
-                positionOptions: {
-                    enableHighAccuracy: true,
-                },
-                trackUserLocation: true,
-            }),
-        );
+        map.addControl(geolocateControl);
+
+        const userLocationMarkerEl = document.createElement("div");
+        userLocationMarkerEl.className = "user-arrow";
+        userLocationMarkerEl.innerHTML = `
+            <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2 L19 21 L12 17 L5 21 Z" fill="#FF5722" stroke="#3E2723" stroke-width="1" />
+            </svg>
+        `;
+        userLocationMarkerEl.style.transformOrigin = "center center";
+
+        const userLocationMarker = new maplibregl.Marker({ element: userLocationMarkerEl });
+
+        geolocateControl.on("geolocate", (event) => {
+            const { longitude, latitude, heading } = event.coords || event;
+            userLocationMarker.setLngLat([longitude, latitude]).addTo(map);
+
+            const angle = heading !== null && heading !== undefined ? heading : map.getBearing();
+            if (angle !== undefined && angle !== null) {
+                userLocationMarkerEl.style.transform = `rotate(${angle}deg)`;
+            }
+        });
 
         map.on("load", function () {
             map.addSource("paths-source", {
@@ -405,7 +418,7 @@
                     "circle-radius": 5,
                     "circle-color": "#e0e1dd",
                     "circle-stroke-width": 2,
-                    "circle-stroke-color": "#000000",
+                    "circle-stroke-color": "#585858",
                 },
             });
 
@@ -538,7 +551,7 @@
             if (menuOpen == true) {
                 //if in path searching mode, change search bar name to destination
                 placeholder = "Start";
-                pathLocation = "Find a Location"
+                pathLocation = "Click to Find a Location"
             } else if (menuOpen == false) {
                 // location finding mode
                 // clear out the value in the search bar and remove the routing layers and selection on the starting building.
@@ -548,12 +561,12 @@
                     ["get", "BldgName"],
                     "",
                 ]);
-                placeholder = "Find a place in PATH";
+                placeholder = "Click to Find a place in PATH";
                 endValue = "";
-                pathLocation = "Find a Path"
+                pathLocation = "Click to Find a Path"
             }
         }}
-        style="background-color: {menuOpen ? '#283618' : '#ee9b00'}; color: {menuOpen
+        style="background-color: {menuOpen ? '#283618' : '#F49200'}; color: {menuOpen
             ? 'white'
             : 'black'}"
         >{pathLocation}
@@ -591,7 +604,7 @@
 
     {#if menuOpen}
         <div class="input-container">
-            <Input bind:inputValue={endValue} placeholder="Destination" />
+            <Input bind:inputValue={endValue} placeholder="Type or Click on map to find a destination" />
             <!-- MENU -->
             {#if endValue.trim() !== "" && filteredItemFinish.length > 0}
                 <div class="dropdown-content">
@@ -638,41 +651,37 @@
 
     .routing-panel {
         position: absolute;
-        width: auto;
-        top: 2vw;
+        width: 40vw;
+        top: 2vh;
         left: 2vw;
         background-color: #588157;
         padding: 10px;
         z-index: 1; /* Ensures it sits above the map */
-        /*width: auto;  Adjust as needed */
-        min-width: 250px;
         display: flex;
         flex-direction: column;
         gap: 10px; /* Space between the two search bars */
         border-radius: 10px;
+        max-width: calc(100vw - 4vw);
+        box-sizing: border-box;
+
     }
 
-    h1 {
-        font-size: 18px;
-        text-align: top;
-    }
-    .dropdown {
-        position: relative;
-        display: inline-block;
-        border-radius: 5px;
-    }
+
 
     .dropdown-content {
         position: relative;
         background-color: #f6f6f6;
         min-width: 230px;
         max-height: 200px;
+        width: auto;
         border: 1px solid #f6f6f6;
         z-index: 1;
         font-family: Verdana;
         overflow-y: auto;
         border-radius: 5px;
         outline: 3px solid #f6bd60;
+        box-sizing: border-box;
+        max-width: 100%;
     }
     .dropdown-item {
         cursor: pointer;
@@ -699,4 +708,35 @@
         position: relative;
         font-weight: bold;
     }
+
+    .user-arrow {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-origin: center center;
+        transition: transform 150ms linear;
+        pointer-events: none;
+    }
+
+    .user-arrow svg path {
+        stroke: #00000022;
+    }
+
+    .maplibregl-user-location-dot,
+    .maplibregl-user-location-accuracy-circle {
+        display: none !important;
+    }
+
+    /* --- Tablets (600px and up) --- */
+@media screen and (max-width: 900px) {
+  .routing-panel {
+    width: calc(90vw - 4vw);
+    left: 2vw;
+    right: 2vw;
+    min-width: unset;
+  }
+}
+
 </style>
