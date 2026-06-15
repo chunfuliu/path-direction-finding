@@ -283,35 +283,22 @@
             attributionControl: false,
             bearing: -15.8,
         });
-
+        // Instantiate and add Geolocate control
         const geolocateControl = new maplibregl.GeolocateControl({
             positionOptions: {
                 enableHighAccuracy: true,
             },
             trackUserLocation: true,
         });
-        map.addControl(geolocateControl);
-
-        const userLocationMarkerEl = document.createElement("div");
-        userLocationMarkerEl.className = "user-arrow";
-        userLocationMarkerEl.innerHTML = `
-            <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2 L19 21 L12 17 L5 21 Z" fill="#FF5722" stroke="#3E2723" stroke-width="1" />
-            </svg>
-        `;
-        userLocationMarkerEl.style.transformOrigin = "center center";
-
-        const userLocationMarker = new maplibregl.Marker({ element: userLocationMarkerEl });
-
-        geolocateControl.on("geolocate", (event) => {
-            const { longitude, latitude, heading } = event.coords || event;
-            userLocationMarker.setLngLat([longitude, latitude]).addTo(map);
-
-            const angle = heading !== null && heading !== undefined ? heading : map.getBearing();
-            if (angle !== undefined && angle !== null) {
-                userLocationMarkerEl.style.transform = `rotate(${angle}deg)`;
-            }
-        });
+        // Add geolocate control to the map.
+        map.addControl(
+            new maplibregl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true,
+                },
+                trackUserLocation: true,
+            }),
+        );
 
         map.on("load", function () {
             map.addSource("paths-source", {
@@ -707,26 +694,6 @@
         border-width: 0px;
         position: relative;
         font-weight: bold;
-    }
-
-    .user-arrow {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transform-origin: center center;
-        transition: transform 150ms linear;
-        pointer-events: none;
-    }
-
-    .user-arrow svg path {
-        stroke: #00000022;
-    }
-
-    .maplibregl-user-location-dot,
-    .maplibregl-user-location-accuracy-circle {
-        display: none !important;
     }
 
     /* --- Tablets (600px and up) --- */
